@@ -3,7 +3,7 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const validate = require('../validators/validate');
 const {
-  createProductVlaidator,
+  createProductValidator,
   productIdParamValidator,
   getProductsByCategoriesValidator,
   updateProductValidator,
@@ -232,7 +232,8 @@ router.post(
   productController.createNewProduct,
 );
 router.put(
-  '/:productId',verifyAccessToken,
+  '/:productId',
+  verifyAccessToken,
   authorizeRoles('admin'),
   updateProductValidator,
   validate,
