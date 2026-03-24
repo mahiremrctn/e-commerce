@@ -1,57 +1,128 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 
-exports.getProducts = async (req, res) => {
-  try{
-    const products = await Product.find().populate('category');
-    res.status(200).json(products);
-   } catch(error) {
-    res.status(500).json({ message: error.message });
-   }
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find().populate('category', 'name');
 
-  };
-exports.createProduct = async (req, res) => {
-  try{
-    const newProduct = new Product(req.body);
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
+    res
+      .status(200)
+      .json({ success: true, count: products.length, data: products });
   } catch (error) {
-    res.status(400).json({ message: error.message});
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// Update a product
-exports.updateProduct = async(req, res) => {
+const updateProduct = async (req, res) => {
   try{
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
+    const product = await Product.findByIdAndUpdate(
+      req.params.productId,
       req.body,
-      { new: true, runValidators: true }
+      { new: true },
     );
-    if (!updatedProduct) return res.status(404).json({ message: 'Ürün Bulunamadı'});
-    res.status(200).json(updatedProduct);
+
+    if(!product) {
+      return res 
+      .status(404)
+      .json({ success: false, message: 'Ürün bulunamadı' });
+    }
+
+    res.json({ success: true, message: 'Ürün silindi' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-//Delete a product
-exports.deleteProduct = async(req, res) => {
+const deleteProduct = async (req, res) => {
+  try{
+    const product = await Product.findByIdAndDelete(req.params.productId);
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Ürün bulunamadı' });
+    }
+    
+    res.json({ success: true, message: 'Ürün silindi' });
+  } catch (error) {
+    res.json({ success: false, message: 'Ürün bulunamadı' });
+  }
+};
+
+const createNewProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if(!product) return res.status(404).json({ message: 'Ürün bulunamadı'});
-    res.status(200).json({ message: 'Ürün başarıyla silindi'});
+    const product = await Product.create(req.body);
+
+    res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const getProductByCategories = async (req, res) => {
+  try{
+    const rawCategories = req.query.categories;
+
+    if(!rawCategories) {
+      return res.status(400).json({
+        success: false,
+        message: 'Kategori parametresi zorunludur',
+      });
+    }
+
+    const normalizedCategories = Array.isArray(rawCategories)
+      ? rawCategories.join(',')
+      : rawCategories;
+
+    const catgoryNames = [
+      ... new Set(
+        normalizedCategories
+        .split(',')
+        .map((category) => category.trim())
+        .filter(Boolean),
+      ),
+    ];
+
+    if(!categoryNames.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Gecerli kategori listesi göndermelisiniz',
+      });
+    }
+
+    const categories = await Category.find({ name: { $in: categoryNames } })
+    .select('_id name')
+    .lean();
+
+    if(!categories.length) {
+      return res.status(404).json({
+        succes: false,
+        message: 'Verilen kategorilere ait sonuc bulunamadi',
+      });
+    }
+
+    const categoryIds = categories.map((category) => category._id);
+    
+    const products = await Product.find({
+      category: { $in: categoryIds },
+    }).populate('category', 'name');
+
+    res.json({
+      success: true,
+      count: products.length,
+      categories: categories.map((category) => category.name),
+      data: products,
+    });
   } catch(error) {
-    res.status(500).json({ message: error.message});
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// Get single product by ID
-exports.getProductById = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).populate('category');
-    if (!product) return res.status(404).json({ message: 'Ürün bulunamadı' });
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+module.exports = {
+  getAllProducts,
+  getProductByCategories,
+  createNewProduct,
+  updateProduct,
+  deleteProduct,
 };
+    
