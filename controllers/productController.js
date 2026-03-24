@@ -27,7 +27,7 @@ const updateProduct = async (req, res) => {
       .json({ success: false, message: 'Ürün bulunamadı' });
     }
 
-    res.json({ success: true, message: 'Ürün silindi' });
+    res.json({ success: true, data: product });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -45,7 +45,7 @@ const deleteProduct = async (req, res) => {
     
     res.json({ success: true, message: 'Ürün silindi' });
   } catch (error) {
-    res.json({ success: false, message: 'Ürün bulunamadı' });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -74,7 +74,7 @@ const getProductByCategories = async (req, res) => {
       ? rawCategories.join(',')
       : rawCategories;
 
-    const catgoryNames = [
+    const categoryNames = [
       ... new Set(
         normalizedCategories
         .split(',')
@@ -96,7 +96,7 @@ const getProductByCategories = async (req, res) => {
 
     if(!categories.length) {
       return res.status(404).json({
-        succes: false,
+        success: false,
         message: 'Verilen kategorilere ait sonuc bulunamadi',
       });
     }
