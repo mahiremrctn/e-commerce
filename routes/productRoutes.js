@@ -9,7 +9,7 @@ const {
   updateProductValidator,
 } = require('../validators/productValidators');
 const { verifyAccessToken } = require('../middleware/auth');
-const {authorizeRoles } = require('../middleware/roles');
+const { authorizeRoles } = require('../middleware/roles');
 
 /**
  * @swagger
