@@ -1,28 +1,47 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { accessToken, refreshToken } = require('../config/jwtConfig');
+const RefreshToken = require('../models/RefreshToken');
 
-exports.protect = async (req, res, next) => {
-  let token;
+const verifyAccessToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-// 1. Check if token exists in Headers / Header'da token var mı?
-  if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      // Get token from "Bearer TOKEN_STRING"
-      token = req.headers.authorization.split(' ')[1];
-
-      // 2. Verify token / Token'ı doğrula
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // 3. Get user from token and attach to Request / Kullanıcıyı isteğe ekle
-      req.user = await User.findById(decoded.id).select('-password');
-
-      next(); //Access granted ! Giriş serbest
-    } catch (error) {
-      res.status(401).json({ message: ' Not authorized, token failed / Yetkisiz erişim'});
-    }
-  }
-  
   if (!token) {
-    res.status(401).json({ message: 'No token authorization denied/ Token bulunamadı'});
+    return res
+      .status(403)
+      .json({ message: 'Token gerekli! Lütfen giriş yapınız!' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, accessToken.secret);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Geçersiz token' });
   }
 };
+
+const verifyRefreshToken = async (req, res, next) => {
+  const { refreshToken: token } = req.body;
+
+  if (!token) {
+    return res.status(403).json({ message: 'Refresh token required' });
+  }
+
+  try {
+    const storedToken = await RefreshToken.findOne({ token });
+    if (!storedToken) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    const decoded = jwt.verify(token, refreshToken.secret);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res
+      .status(401)
+      .json({ message: 'Invalid or expired refresh token' });
+  }
+};
+
+module.exports = { verifyAccessToken, verifyRefreshToken };
