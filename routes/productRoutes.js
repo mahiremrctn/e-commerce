@@ -81,33 +81,6 @@ const {authorizeRoles } = require('../middleware/roles');
  */
 
 /**
-
-/**
- * @swagger
- * /api/products/by-categories:
- *   get:
- *     summary: Kategori adlarina gore urunleri listeler
- *     tags:
- *       - Products
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: categories
- *         required: true
- *         schema:
- *           type: string
- *         description: Virgulle ayrilmis kategori adlari (ornek Elektronik,Giyim)
- *     responses:
- *       200:
- *         description: Kategorilere gore urun listesi
- *       400:
- *         description: categories parametresi eksik/gecersiz
- *       404:
- *         description: Verilen kategoriler icin sonuc bulunamadi
- */
-
-/**
  * @swagger
  * /api/products:
  *   get:
@@ -147,8 +120,29 @@ const {authorizeRoles } = require('../middleware/roles');
  */
 
 /**
-router.get('/', productController.getProducts);
-router.post('/', protect, productController.createProduct);
+ * @swagger
+ * /api/products/by-categories:
+ *   get:
+ *     summary: Kategori adlarina gore urunleri listeler
+ *     tags:
+ *       - Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: categories
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Virgulle ayrilmis kategori adlari (ornek Elektronik,Giyim)
+ *     responses:
+ *       200:
+ *         description: Kategorilere gore urun listesi
+ *       400:
+ *         description: categories parametresi eksik/gecersiz
+ *       404:
+ *         description: Verilen kategoriler icin sonuc bulunamadi
+ */
 
 /**
  * @swagger
@@ -206,7 +200,6 @@ router.post('/', protect, productController.createProduct);
  *       404:
  *         description: Urun bulunamadi
  */
-
 router.get(
   '/',
   verifyAccessToken,
@@ -227,10 +220,11 @@ router.post(
   '/',
   verifyAccessToken,
   authorizeRoles('admin'),
-  updateProductValidator,
+  createProductValidator,
   validate,
   productController.createNewProduct,
 );
+
 router.put(
   '/:productId',
   verifyAccessToken,
@@ -238,7 +232,8 @@ router.put(
   updateProductValidator,
   validate,
   productController.updateProduct,
-)
+);
+
 router.delete(
   '/:productId',
   verifyAccessToken,
