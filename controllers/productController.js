@@ -59,7 +59,7 @@ const createNewProduct = async (req, res) => {
   }
 };
 
-const getProductByCategories = async (req, res) => {
+const getProductsByCategories = async (req, res) => {
   try{
     const rawCategories = req.query.categories;
 
@@ -120,7 +120,7 @@ const getProductByCategories = async (req, res) => {
 
 module.exports = {
   getAllProducts,
-  getProductByCategories,
+  getProductsByCategories,
   createNewProduct,
   updateProduct,
   deleteProduct,
