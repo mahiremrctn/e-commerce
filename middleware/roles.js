@@ -14,6 +14,10 @@ const authorizeRoles = (...allowedRoles) => {
         .json({ message: 'Bu işlem için gerekli role bilgisine ulaşilamadi' });
     }
 
+/*     if (userRole === 'admin') {
+      return next();
+    } */
+
     if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({ message: 'Bu işlem için yetkiniz yok.' });
     }
@@ -21,4 +25,5 @@ const authorizeRoles = (...allowedRoles) => {
     next();
   };
 };
+
 module.exports = { authorizeRoles };
