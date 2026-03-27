@@ -1,42 +1,152 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const fs = require('node:fs');
+const path = require('node:path');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { accessToken, refreshToken } = require('../config/jwtConfig');
+const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
 
-//Token oluşturmak için yardımcı fonksiyon
-const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
+const generateTokens = (user) => {
+  const userId = user._id ? user._id.toString() : user.id;
+  const userRole = user.role || 'user';
+
+  const accessTokenPayload = { id: userId, email: user.email, role: userRole };
+  const refreshTokenPayload = { id: userId };
+
+  const newAccessToken = jwt.sign(accessTokenPayload, accessToken.secret, {
+    expiresIn: accessToken.expiresIn,
   });
+
+  const newRefreshToken = jwt.sign(refreshTokenPayload, refreshToken.secret, {
+    expiresIn: refreshToken.expiresIn,
+  });
+
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
-exports.register = async (req, res) => {
+const registerUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const newUser = await User.create({ email, password });
 
-    const token = createToken(newUser._id);
-    res.status(201).json({ user: newUser, token });
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: 'Bu email adresi zaten kayıtlı!' });
+    }
+
+    // Password hash'leme
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
+
+    const createdUser = await User.create({
+      email,
+      password: hashedPassword,
+    });
+
+    // const { password: _, ...newUser } = createdUser;
+
+    const userWithoutPassword = {
+      id: createdUser._id.toString(),
+      email: createdUser.email,
+      createdAt: createdUser.createdAt,
+      updatedAt: createdUser.updatedAt,
+    };
+
+    res.status(201).json(userWithoutPassword);
   } catch (error) {
-    console.error('Kayıt Hatası Detayı:', error);
     res.status(400).json({ message: error.message });
   }
 };
 
-exports.login = async (req, res) => {
+const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Kullanıcı Bulunamadı" });
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    const existingUser = await User.findOne({ email });
+
+    if (!existingUser) {
+      return res.status(401).json({ message: 'Geçersiz email veya şifre' });
+    }
+
+    // Şifre Kontrolü                             // 123456     // $2b$10$bdH29/sfSfi0u0OYf2YZl.WQNaFJw8QpJBmVxz3afxKXdEhx.gntK
+    const validPassword = await bcryptjs.compare(
+      password,
+      existingUser.password,
+    );
+
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Geçersiz email veya şifre' });
+    }
+
+    const userWithoutPassword = {
+      id: existingUser._id.toString(),
+      email: existingUser.email,
+      createdAt: existingUser.createdAt,
+      updatedAt: existingUser.updatedAt,
+    };
+
+    const tokens = generateTokens(existingUser);
+
+    await RefreshToken.deleteMany({ userId: existingUser._id });
+
+    await RefreshToken.create({
+      userId: user._id,
+      token: tokens.refreshToken,
+    });
+
+    res
+      .status(200)
+      .json({ message: 'Giriş başarılı!', user: userWithoutPassword, tokens });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const refreshTokens = async (req, res) => {
+  try {
+    const oldRefreshToken = req.body.refreshToken;
+
+    if (!oldRefreshToken) {
       return res
         .status(400)
-        .json({ message: "Invalid credentials / Geçersiz bilgiler" });
+        .json({ message: 'Refresh token değerli zorunludur!' });
+    }
 
-    const token = createToken(user._id);
-    res.status(200).json({ user, token });
+    await RefreshToken.deleteMany({ token: oldRefreshToken });
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        message: 'Geçersiz kullanıcı bilgisi. Lütfen tekrar giriş yapın.',
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: 'Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.' });
+    }
+
+    // Generate new tokens
+    const tokens = generateTokens(req.user);
+
+    // Save new refresh token
+    await RefreshToken.create({
+      userId: existingUser._id,
+      token: tokens.refreshToken,
+    });
+
+    res.status(200).json(tokens);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  refreshTokens,
 };
