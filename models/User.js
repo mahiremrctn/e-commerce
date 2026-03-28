@@ -1,31 +1,30 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String, 
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  role: {
-    type: String,
-    enum: ['admin', 'customer'],
-    default: 'admin' 
-  }
-}, { timestamps: true});
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: [true, 'Email zorunludur!'], // Validasyon
+      trim: true,
+      unique: true,
+      lowercase: true,
+    },
 
-userSchema.pre('save', async function () { 
-    if (!this.isModified('password')) return;
-    
-    try {
-        this.password = await bcrypt.hash(this.password, 10);
-  } catch (error) {
-         throw error;
-}
-});
-module.exports = mongoose.model('User', userSchema);
+    password: {
+      type: String,
+      required: [true, 'Parola zorunludur!'],
+      minlength: [6, 'Parola en az 6 karakter olmalidir!'],
+    },
+
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+  },
+  {
+    timestamps: true, // createdAt ve updatedAt otomatik eklenir
+  },
+);
+
+module.exports = mongoose.model('User', userSchema); 
