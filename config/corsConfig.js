@@ -22,7 +22,7 @@ const corsOptions = {
       callback(new Error('CORS politikası tarafından engellendiniz!'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTİONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: true,
 };
