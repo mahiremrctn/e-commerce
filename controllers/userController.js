@@ -55,4 +55,63 @@ const createNewUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.body.id || req.body.userId || req.params.userId;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Guncelleme icin userId zorunludur',
+      });
+    }
+
+    const { email, password, role } = req.body;
+    const updatePayload = {};
+
+    if (email !== undefined) updatePayload.email = email;
+    if (role !== undefined) updatePayload.role = role;
+
+    if (password !== undefined) {
+      const salt = await bcryptjs.genSalt(10);
+      updatePayload.password = await bcryptjs.hash(password, salt);
+    }
+
+    if (!Object.keys(updatePayload).length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Guncellenecek en az bir alan gondermelisiniz',
+      });
+    }
+
+    if (updatePayload.email) {
+      const existingUser = await User.findOne({ email: updatePayload.email })
+        .select('_id')
+        .lean();
+
+      if (existingUser && existingUser._id.toString() !== userId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Bu email adresi zaten kullanimda',
+        });
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatePayload, {
+      new: true,
+      runValidators: true,
+    }).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'Kullanici bulunamadi',
+      });
+    }
+
+    res.status(200).json({ success: true, data: updatedUser });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
 
