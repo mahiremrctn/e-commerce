@@ -115,3 +115,19 @@ const updateUser = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if(!deletedUser) {
+      res.status(404).json({
+        success: false,
+        message: 'Kullanici bulunamadi'
+      });
+    }
+
+    
+  }
+}
