@@ -128,6 +128,15 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    
+      res.status(200).json({ success: true, message: 'Kullanici silindi' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
+};
+
+module.exports = {
+  getAllUsers,
+  createNewUser,
+  updateUser,
+  deleteUser,
 }
