@@ -1,21 +1,33 @@
+const { format } = require('date-fns');
+const { v4: uuid } = require('uuid');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
-const { format } = require('date-fns');
 
-const logEvents = async (message,logName) => {
-  const dateTime = `${format(new Date(), 'yyyyMMdd\tHH:mm:ss')}`;
-  const logItem = `${dateTime}\t${message}\n`;
+const logEvents = async (message, logFileName) => {
+  const dateTime = format(new Date(), 'dd.MM.yyyy - HH.mm.ss');
+  const logItem = `${dateTime}\t${uuid()}\t${message}`;
 
   try {
-    //'logs klasörü yoksa oluştur'
     if (!fs.existsSync(path.join(__dirname, '..', 'logs'))) {
-        await fsPromises.mkdir(path.join(__dirname, '..', 'logs'));
+      await fsPromises.mkdir(path.join(__dirname, '..', 'logs'));
     }
-    //Mesajı dosyanın sonuna ekle 
-    await fsPromises.appendFile(path.join(__dirname, '..', 'logs', logName), logItem);
+
+    await fsPromises.appendFile(
+      path.join(__dirname, '..', 'logs', logFileName),
+      logItem,
+    );
   } catch (err) {
-      console.log(err);
+    console.log(err);
   }
-}
+};
+
+// Request loglama middleware
+const logger = (req, res, next) => {
+  const message = `${req.method}\t${req.url}\t${req.headers.origin}`;
+
+  logEvents(message, 'reqLog.log');
+  next();
+};
+
 module.exports = { logEvents, logger };
