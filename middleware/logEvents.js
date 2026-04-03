@@ -18,4 +18,4 @@ const logEvents = async (message,logName) => {
       console.log(err);
   }
 }
-module.exports = { logEvents };
+module.exports = { logEvents, logger };
