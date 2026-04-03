@@ -122,7 +122,7 @@ const deleteUser = async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(userId);
 
     if(!deletedUser) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: 'Kullanici bulunamadi'
       });
@@ -139,4 +139,4 @@ module.exports = {
   createNewUser,
   updateUser,
   deleteUser,
-}
+};
