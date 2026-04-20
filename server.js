@@ -30,7 +30,7 @@ const io = new Server(server, {
 
 app.use(cors(corsOptions));
 //Swagger docs 
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 //Request log middleware
 app.use(logger);
 
