@@ -18,6 +18,7 @@
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
     "helmet": "^8.1.0",
+    "iyzipay": "^2.0.67",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.2",
     "socket.io": "^4.8.3",
