@@ -45,8 +45,6 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    // const { password: _, ...newUser } = createdUser;
-
     const userWithoutPassword = {
       id: createdUser._id.toString(),
       email: createdUser.email,
@@ -70,7 +68,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Geçersiz email veya şifre' });
     }
 
-    // Şifre Kontrolü                             // 123456     // $2b$10$bdH29/sfSfi0u0OYf2YZl.WQNaFJw8QpJBmVxz3afxKXdEhx.gntK
+    // Şifre Kontrolü
     const validPassword = await bcryptjs.compare(
       password,
       existingUser.password,
@@ -91,8 +89,9 @@ const loginUser = async (req, res) => {
 
     await RefreshToken.deleteMany({ userId: existingUser._id });
 
+    // DÜZELTİLDİ: user._id yerine existingUser._id kullanıldı
     await RefreshToken.create({
-      userId: user._id,
+      userId: existingUser._id, 
       token: tokens.refreshToken,
     });
 
@@ -131,11 +130,12 @@ const refreshTokens = async (req, res) => {
     }
 
     // Generate new tokens
-    const tokens = generateTokens(req.user);
+    const tokens = generateTokens(user); // DÜZELTİLDİ: req.user yerine user kullanmak daha güvenli
 
     // Save new refresh token
+    // DÜZELTİLDİ: existingUser._id yerine user._id kullanıldı
     await RefreshToken.create({
-      userId: existingUser._id,
+      userId: user._id,
       token: tokens.refreshToken,
     });
 
