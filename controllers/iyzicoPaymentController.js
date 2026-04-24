@@ -155,3 +155,40 @@ const createCheckoutForm = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+const handleCheckoutCallback = async (req, res) => {
+    try {
+        const { token, conversationId } = req.body;
+
+        if (!token) {
+            return res.redirect(303, '/api/iyzico-payments/failure');
+        }
+
+        const checkoutFormResult = await retrieveCheckoutFormResult({
+            locale: Iyzipay.LOCALE.TR,
+            conversationId: conversationId || '',
+            token,
+        });
+
+        const orderId = checkoutFormResult.conversationId || conversationId;
+        const isPaymentSuccessful =
+            checkoutFormResult.status === 'success'
+            && String(checkoutFormResult.paymentStatus).toUpperCase() === 'SUCCESS';
+
+        if (orderId) {
+            await Order.findByIdAndUpdate(orderId, {
+                paymentStatus: isPaymentSuccessful ? 'success' : 'failure',
+                iyzicoToken: token,
+                iyzicoPaymentId: checkoutFormResult.paymentId || undefined,
+            });
+        }
+
+        if (isPaymentSuccessful) {
+            return res.redirect(303, '/api/iyzico-payments/success');
+        }
+
+        return res.redirect(303, '/api/iyzico-payments/failure');
+    } catch (error) {
+        return res.redirect(303, '/api/iyzico-payments/failure');
+    }
+};
