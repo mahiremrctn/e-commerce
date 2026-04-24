@@ -109,3 +109,49 @@ const createCheckoutForm = async (req, res) => {
                 },
             ],
         };
+
+        iyzipay.checkoutFormInitialize.create(
+            checkoutFormRequest,
+            async (error, result) => {
+                if (error) {
+                    await Order.findByIdAndUpdate(order._id, {
+                        paymentStatus: 'failure',
+                    });
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Ödeme formu oluşturulamadı',
+                        error: error.message || error,
+                    });
+                }
+                if (result.status === 'success') {
+                    await Order.findByIdAndUpdate(order._id, {
+                        paymentStatus: 'pending',
+                        iyzicoToken: result.token,
+                    });
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Ödeme formu oluşturuldu',
+                        data: {
+                            orderId: order._id,
+                            paymentPageUrl: result.paymentPageUrl,
+                            token: result.token,
+                            checkoutFormContent: result.checkoutFormContent,
+                        },
+                    });
+                }
+
+                await Order.findByIdAndUpdate(order._id, {
+                    paymentStatus: 'failure',
+                });
+
+                return res.status(400).json({
+                    success: false,
+                    message: result.errorMessage || 'Ödeme formu oluşturulamadı',
+                });
+            },
+        );
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
