@@ -28,3 +28,39 @@ const retrieveCheckoutFormResult = (checkoutFormRequest) => {
         );
     });
 };
+
+const createCheckoutForm = async (req, res) => {
+    try {
+        const { productId, quantity = 1 } = req.body;
+        const userId = req.user.id;
+
+        if (!productId) {
+            return res
+                .status(400)
+                .json({ success: false, message: 'Ürün ID zorunludur' });
+        }
+        
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'Ürün bulunamadı' });
+        }
+
+        if (!product.inStock) {
+            return res
+                .status(400)
+                .json({ success: false, message: 'Ürün stokta yok' });
+        }
+
+        const totalPrice = (product.price * quantity).toFixed(2);
+
+        const order = await Order.create({
+            user: userId,
+            product: productId,
+            quantity,
+            totalPrice,
+            paymentStatus: 'pending',
+            paymentProvider: 'iyzico',
+        });
