@@ -192,3 +192,18 @@ const handleCheckoutCallback = async (req, res) => {
         return res.redirect(303, '/api/iyzico-payments/failure');
     }
 };
+
+const getPaymentSuccessPage = (req, res) => {
+    return res.sendFile(getPaymentPagePath('payment-success.html'));
+};
+
+const getPaymentFailurePage = (req, res) => {
+    return res.sendFile(getPaymentPagePath('payment-failure.html'));
+};
+
+module.exports = {
+    createCheckoutForm,
+    handleCheckoutCallback,
+    getPaymentSuccessPage,
+    getPaymentFailurePage,
+};
