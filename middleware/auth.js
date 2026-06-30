@@ -44,4 +44,13 @@ const verifyRefreshToken = async (req, res, next) => {
   }
 };
 
-module.exports = { verifyAccessToken, verifyRefreshToken };
+const isAdmin = (req, res, next) => {
+  if(req.user && req.user.role === 'admin') {
+    next();
+  } else{
+    return res.status(403).json({ message: 'Erişim reddedildi! Bu işlem için Admin yetkisi gereklidir.'});
+  }
+};
+
+
+module.exports = { verifyAccessToken, verifyRefreshToken, isAdmin };
