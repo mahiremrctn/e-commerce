@@ -202,15 +202,11 @@ const { authorizeRoles } = require('../middleware/roles');
  */
 router.get(
   '/',
-  verifyAccessToken,
-  authorizeRoles('admin'),
   productController.getAllProducts,
 );
 
 router.get(
   '/by-categories',
-  verifyAccessToken,
-  authorizeRoles('admin'),
   getProductsByCategoriesValidator,
   validate,
   productController.getProductsByCategories,
