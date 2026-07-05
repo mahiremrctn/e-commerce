@@ -6,7 +6,6 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const { logger } = require('./middleware/logEvents.js');
 const { errorHandler } = require('./middleware/errorHandler');
-const corsOptions = require('./config/corsConfig.js');
 const userRoutes = require('./routes/userRoutes.js');
 const authRoutes = require('./routes/authRoutes.js');
 const productRoutes = require('./routes/productRoutes.js');
@@ -15,7 +14,6 @@ const iyzicoPaymentRoutes = require('./routes/iyzicoPaymentRoutes.js');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger.js');
 const connectDB = require('./config/dbConfig');
-const path = require('path');
 
 //DB Bağlantısı
 connectDB();
@@ -29,7 +27,7 @@ const io = new Server(server, {
   },
 });
 
-app.use(cors(corsOptions));
+app.use(cors());
 //Swagger docs 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 //Request log middleware
