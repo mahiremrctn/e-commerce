@@ -118,11 +118,73 @@ const getProductsByCategories = async (req, res) => {
   }
 };
 
+const getProducts = async (req, res, next) => {
+  try {
+    console.log("getProducts çalıştı", req.query);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const { category, minPrice, maxPrice, sortBy } = req.query;
+    let query = {};
+
+    if (category) query.category = category;
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // Sıralama ayarı (Örn: sortBy=price_asc veya price_desc)
+    let sortOptions = {};
+    if (sortBy === 'price_asc') sortOptions.price = 1;
+    if (sortBy === 'price_desc') sortOptions.price = -1;
+
+    const products = await Product.find(query)
+      .populate('category', 'name description') // Sadece kategori ID'si değil, ismi de gelir
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      pagination: {
+        total: totalProducts,
+        page,
+        pages: Math.ceil(totalProducts / limit)
+      },
+      data: products
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('category', 'name');
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Ürün bulunamadı' });
+    }
+
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    console.error('Ürün getirme hatası:', error.message);
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getAllProducts,
+  getProductById,
   getProductsByCategories,
   createNewProduct,
   updateProduct,
   deleteProduct,
+  getProducts,
 };
     

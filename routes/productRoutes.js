@@ -1,15 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const productController = require('../controllers/productController');
-const validate = require('../validators/validate');
+const productController = require("../controllers/productController");
+const validate = require("../validators/validate");
 const {
   createProductValidator,
   productIdParamValidator,
   getProductsByCategoriesValidator,
   updateProductValidator,
-} = require('../validators/productValidators');
-const { verifyAccessToken } = require('../middleware/auth');
-const { authorizeRoles } = require('../middleware/roles');
+} = require("../validators/productValidators");
+const { verifyAccessToken } = require("../middleware/auth");
+const { authorizeRoles } = require("../middleware/roles");
 
 /**
  * @swagger
@@ -200,40 +200,44 @@ const { authorizeRoles } = require('../middleware/roles');
  *       404:
  *         description: Urun bulunamadi
  */
-router.get(
-  '/',
-  productController.getAllProducts,
-);
+router.get("/", productController.getProducts);
 
 router.get(
-  '/by-categories',
+  "/by-categories",
   getProductsByCategoriesValidator,
   validate,
   productController.getProductsByCategories,
 );
 
+router.get(
+  "/:id",
+  productIdParamValidator,
+  validate,
+  productController.getProductById,
+);
+
 router.post(
-  '/',
+  "/",
   verifyAccessToken,
-  authorizeRoles('admin'),
+  authorizeRoles("admin"),
   createProductValidator,
   validate,
   productController.createNewProduct,
 );
 
 router.put(
-  '/:productId',
+  "/:productId",
   verifyAccessToken,
-  authorizeRoles('admin'),
+  authorizeRoles("admin"),
   updateProductValidator,
   validate,
   productController.updateProduct,
 );
 
 router.delete(
-  '/:productId',
+  "/:productId",
   verifyAccessToken,
-  authorizeRoles('admin'),
+  authorizeRoles("admin"),
   productIdParamValidator,
   validate,
   productController.deleteProduct,
