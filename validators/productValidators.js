@@ -23,8 +23,8 @@ const createProductValidator = [
     .exists({ checkNull: true })
     .withMessage('Fiyat zorunludur')
     .bail()
-    .isFloat({ min: 0 })
-    .withMessage('Fiyat 0 veya daha buyuk bir sayi olmalidir'),
+    .isFloat({ gt: 0 })
+    .withMessage('Fiyat 0dan buyuk bir sayi olmalidir'),
 
   body('category')
     .exists({ checkNull: true })
@@ -118,8 +118,8 @@ const updateProductValidator = [
 
   body('price')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Fiyat 0 veya daha buyuk bir sayi olmalidir'),
+    .isFloat({ gt: 0 })
+    .withMessage('Fiyat 0dan buyuk bir sayi olmalidir'),
 
   body('category')
     .optional()
