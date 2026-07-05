@@ -126,7 +126,10 @@ const { authorizeRoles } = require('../middleware/roles');
  *         description: Kategori bulunamadı
  */
 
-router.post('/', categoryController.createCategory);
+router.post('/', 
+  verifyAccessToken,
+  authorizeRoles('admin'),
+  categoryController.createCategory);
 
 router.get('/', categoryController.getAllCategories);
 

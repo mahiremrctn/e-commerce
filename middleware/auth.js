@@ -17,6 +17,7 @@ const verifyAccessToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
+    console.error('Token doğrulama hatası:', error.message);
     return res.status(401).json({ message: 'Geçersiz token' });
   }
 };
@@ -37,7 +38,8 @@ const verifyRefreshToken = async (req, res, next) => {
     const decoded = jwt.verify(token, refreshToken.secret);
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch (error) {
+    console.error('Token doğrulama hatası:', error.message);
     return res
       .status(401)
       .json({ message: 'Invalid or expired refresh token' });
