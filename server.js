@@ -1,5 +1,5 @@
 require('dotenv').config();
-
+const helmet = require('helmet');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -14,6 +14,7 @@ const iyzicoPaymentRoutes = require('./routes/iyzicoPaymentRoutes.js');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger.js');
 const connectDB = require('./config/dbConfig');
+const rateLimit = require('express-rate-limit');
 
 //DB Bağlantısı
 connectDB();
@@ -26,6 +27,16 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
+
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 dakika
+  max: 100,                  // 15 dakikada max 100 istek
+  message: { success: false, message: 'Çok fazla istek gönderildi, lütfen bekleyin.' }
+});
+
+app.use('/api/products', limiter);
 
 app.use(cors());
 //Swagger docs 
