@@ -84,18 +84,46 @@ const { authorizeRoles } = require("../middleware/roles");
  * @swagger
  * /api/products:
  *   get:
- *     summary: Tum urunleri listeler
+ *     summary: Tum urunleri listeler, filtreler ve sayfalama destekler
  *     tags:
  *       - Products
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Sayfa numarasi (varsayilan 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Sayfa basina urun sayisi (varsayilan 10)
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum fiyat filtresi
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maksimum fiyat filtresi
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [price_asc, price_desc]
+ *         description: Siralama secenegi
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Kategori ID sine gore filtrele
  *     responses:
  *       200:
  *         description: Basarili urun listesi
- *       401:
- *         description: Yetkilendirme hatasi (token yok/gecersiz)
- *       403:
- *         description: Rol yetkisi yetersiz
+ *       400:
+ *         description: Gecersiz parametre
  *   post:
  *     summary: Yeni urun olusturur
  *     tags:
