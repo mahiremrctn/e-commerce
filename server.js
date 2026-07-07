@@ -36,8 +36,6 @@ const limiter = rateLimit({
   message: { success: false, message: 'Çok fazla istek gönderildi, lütfen bekleyin.' }
 });
 
-app.use('/api/products', limiter);
-
 app.use(cors());
 //Swagger docs 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -52,6 +50,7 @@ app.use(express.urlencoded({ extended: false }));
 // Use the routes / Rotaları kullan
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/products', limiter);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/iyzico-payments', iyzicoPaymentRoutes);
