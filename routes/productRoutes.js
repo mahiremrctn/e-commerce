@@ -147,6 +147,21 @@ const { authorizeRoles } = require("../middleware/roles");
 /**
  * @swagger
  * /api/products/{productId}:
+ *   get:
+ *     summary: Tekil urun detayini goruntuler (Musteriler icin)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Urunun benzersiz ID degeri
+ *     responses:
+ *       200:
+ *         description: Urun detayı basariyla getirildi
+ *       404:
+ *         description: Urun bulunamadi
  *   put:
  *     summary: Urun bilgilerini gunceller
  *     tags:
@@ -210,7 +225,7 @@ router.get(
 );
 
 router.get(
-  "/:id",
+  "/:productId",
   productIdParamValidator,
   validate,
   productController.getProductById,

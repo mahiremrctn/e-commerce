@@ -120,7 +120,6 @@ const getProductsByCategories = async (req, res) => {
 
 const getProducts = async (req, res, next) => {
   try {
-    console.log("getProducts çalıştı", req.query);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -165,7 +164,7 @@ const getProducts = async (req, res, next) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category', 'name');
+    const product = await Product.findById(req.params.productId).populate('category', 'name');
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Ürün bulunamadı' });
