@@ -11,6 +11,24 @@ const validateCategoryExists = async (categoryId) => {
   return true;
 };
 
+const validateDiscountFields = (value, { req }) => {
+  const { oldPrice, discountPrice } = req.body;
+
+  if (discountPrice === undefined || discountPrice === null || discountPrice === '') {
+    return true;
+  }
+
+  if (oldPrice === undefined || oldPrice === null || oldPrice === '') {
+    throw new Error('Indirimli fiyat icin eski fiyat da gonderilmelidir');
+  }
+
+  if (Number(discountPrice) >= Number(oldPrice)) {
+    throw new Error('Indirimli fiyat eski fiyattan kucuk olmalidir');
+  }
+
+  return true;
+};
+
 const createProductValidator = [
   body('name')
     .trim()
@@ -25,6 +43,18 @@ const createProductValidator = [
     .bail()
     .isFloat({ gt: 0 })
     .withMessage('Fiyat 0dan buyuk bir sayi olmalidir'),
+
+  body('oldPrice')
+    .optional({ nullable: true })
+    .isFloat({ gt: 0 })
+    .withMessage('Eski fiyat 0dan buyuk bir sayi olmalidir'),
+
+  body('discountPrice')
+    .optional({ nullable: true })
+    .isFloat({ gt: 0 })
+    .withMessage('Indirimli fiyat 0dan buyuk bir sayi olmalidir')
+    .bail()
+    .custom(validateDiscountFields),
 
   body('category')
     .exists({ checkNull: true })
@@ -89,7 +119,15 @@ const updateProductValidator = [
 
   body()
     .custom((_, { req }) => {
-      const allowedFields = ['name', 'price', 'category', 'description', 'image'];
+      const allowedFields = [
+        'name',
+        'price',
+        'oldPrice',
+        'discountPrice',
+        'category',
+        'description',
+        'image',
+      ];
       const payloadKeys = Object.keys(req.body || {});
 
       if (!payloadKeys.length) {
@@ -117,6 +155,18 @@ const updateProductValidator = [
     .optional()
     .isFloat({ gt: 0 })
     .withMessage('Fiyat 0dan buyuk bir sayi olmalidir'),
+
+  body('oldPrice')
+    .optional({ nullable: true })
+    .isFloat({ gt: 0 })
+    .withMessage('Eski fiyat 0dan buyuk bir sayi olmalidir'),
+
+  body('discountPrice')
+    .optional({ nullable: true })
+    .isFloat({ gt: 0 })
+    .withMessage('Indirimli fiyat 0dan buyuk bir sayi olmalidir')
+    .bail()
+    .custom(validateDiscountFields),
 
   body('category')
     .optional()

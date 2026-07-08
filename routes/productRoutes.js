@@ -24,6 +24,10 @@ const { authorizeRoles } = require("../middleware/roles");
  *           type: string
  *         price:
  *           type: number
+ *         oldPrice:
+ *           type: number
+ *         discountPrice:
+ *           type: number
  *         category:
  *           type: string
  *         description:
@@ -45,6 +49,12 @@ const { authorizeRoles } = require("../middleware/roles");
  *         price:
  *           type: number
  *           minimum: 0
+ *         oldPrice:
+ *           type: number
+ *           minimum: 0
+ *         discountPrice:
+ *           type: number
+ *           minimum: 0
  *         category:
  *           type: string
  *         description:
@@ -60,6 +70,12 @@ const { authorizeRoles } = require("../middleware/roles");
  *           type: string
  *           maxLength: 120
  *         price:
+ *           type: number
+ *           minimum: 0
+ *         oldPrice:
+ *           type: number
+ *           minimum: 0
+ *         discountPrice:
  *           type: number
  *           minimum: 0
  *         category:

@@ -17,7 +17,9 @@ const buildWhatsAppMessage = ({ cartItems, totalPrice, customerName, note }) => 
     lines.push(
       `${index + 1}. ${item.name}`,
       `Adet: ${item.quantity}`,
-      `Birim fiyat: ${formatPrice(item.unitPrice)}`,
+      item.hasDiscount
+        ? `Birim fiyat: ${formatPrice(item.unitPrice)} (Indirimli, eski fiyat: ${formatPrice(item.oldPrice)})`
+        : `Birim fiyat: ${formatPrice(item.unitPrice)}`,
       `Ara toplam: ${formatPrice(item.subtotal)}`,
       '',
     );
@@ -48,7 +50,7 @@ const createWhatsAppCartLink = async (req, res, next) => {
 
     const productIds = items.map((item) => item.productId);
     const products = await Product.find({ _id: { $in: productIds } })
-      .select('name price image')
+      .select('name price oldPrice discountPrice image')
       .lean();
 
     if (products.length !== new Set(productIds).size) {
@@ -65,7 +67,8 @@ const createWhatsAppCartLink = async (req, res, next) => {
     const cartItems = items.map((item) => {
       const product = productsById.get(item.productId);
       const quantity = Number(item.quantity);
-      const unitPrice = Number(product.price);
+      const hasDiscount = Boolean(product.discountPrice);
+      const unitPrice = Number(hasDiscount ? product.discountPrice : product.price);
       const subtotal = unitPrice * quantity;
 
       return {
@@ -74,6 +77,9 @@ const createWhatsAppCartLink = async (req, res, next) => {
         image: product.image,
         quantity,
         unitPrice,
+        oldPrice: product.oldPrice,
+        discountPrice: product.discountPrice,
+        hasDiscount,
         subtotal,
       };
     });

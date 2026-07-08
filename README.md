@@ -106,10 +106,18 @@ Urunler asagidaki ana alanlardan olusur:
 - `name`: Urun adi
 - `description`: Urun aciklamasi
 - `price`: Urun fiyati
+- `oldPrice`: Indirim oncesi eski fiyat
+- `discountPrice`: Kampanyali satis fiyati
 - `image`: Urun gorsel URL'si
 - `category`: MongoDB ObjectId ile kategori referansi
 
 Listeleme endpoint'lerinde kategori bilgisi `populate` ile urun cevabina eklenir.
+
+## Indirim Sistemi
+
+Urunlerde `oldPrice` ve `discountPrice` alanlari opsiyoneldir. Indirimli urunlerde frontend `oldPrice` alanini ustu cizili eski fiyat olarak, `discountPrice` alanini kampanyali fiyat olarak gosterebilir. `discountPrice` gonderildiginde `oldPrice` da gonderilmeli ve indirimli fiyat eski fiyattan dusuk olmalidir.
+
+WhatsApp sepet entegrasyonu indirimli urunlerde toplam tutari `discountPrice` uzerinden hesaplar. Indirim yoksa normal `price` alani kullanilir.
 
 ## WhatsApp Sepet Entegrasyonu
 

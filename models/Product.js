@@ -17,6 +17,14 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Ürün fiyatı zorunludur'],
     min: [0, 'Fiyat negatif olamaz'],
   },
+  oldPrice: {
+    type: Number,
+    min: [0, 'Eski fiyat negatif olamaz'],
+  },
+  discountPrice: {
+    type: Number,
+    min: [0, 'Indirimli fiyat negatif olamaz'],
+  },
   image: {
     type: String,
     default: 'https://via.placeholder.com/150',
