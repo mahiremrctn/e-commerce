@@ -3,6 +3,12 @@ const router = express.Router();
 const categoryController = require('../controllers/categoryController');
 const { verifyAccessToken } = require('../middleware/auth');
 const { authorizeRoles } = require('../middleware/roles');
+const validate = require('../validators/validate');
+const {
+  categoryIdParamValidator,
+  createCategoryValidator,
+  updateCategoryValidator,
+} = require('../validators/categoryValidators');
 
 /**
  * @swagger
@@ -129,6 +135,8 @@ const { authorizeRoles } = require('../middleware/roles');
 router.post('/', 
   verifyAccessToken,
   authorizeRoles('admin'),
+  createCategoryValidator,
+  validate,
   categoryController.createCategory);
 
 router.get('/', categoryController.getAllCategories);
@@ -137,6 +145,8 @@ router.put(
   '/:id',
   verifyAccessToken,
   authorizeRoles('admin'),
+  updateCategoryValidator,
+  validate,
   categoryController.updateCategory
 );
 
@@ -144,6 +154,8 @@ router.delete(
   '/:id',
   verifyAccessToken,
   authorizeRoles('admin'),
+  categoryIdParamValidator,
+  validate,
   categoryController.deleteCategory  
 );
 

@@ -1,29 +1,32 @@
-  const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-  const productSchema = new mongoose.Schema({
-    name: {
-      type: String,
-      required: [true, 'Ürün adı zorunludur'],
-      trim: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
-  price: {
-          type: Number,
-          required: true,
-          min: 0 // Price cannot be negative / Fiyat negatif olamaz
-      },
-  image:{
+const productSchema = new mongoose.Schema({
+  name: {
     type: String,
-    default: "https://via.placeholder.com/150"
+    required: [true, 'Ürün adı zorunludur'],
+    trim: true,
+  },
+  description: {
+    type: String,
+    required: [true, 'Ürün açıklaması zorunludur'],
+    trim: true,
+    maxlength: [500, 'Ürün açıklaması en fazla 500 karakter olabilir'],
+  },
+  price: {
+    type: Number,
+    required: [true, 'Ürün fiyatı zorunludur'],
+    min: [0, 'Fiyat negatif olamaz'],
+  },
+  image: {
+    type: String,
+    default: 'https://via.placeholder.com/150',
+    trim: true,
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
-    required: true
-  }
-}, { timestamps: true });  // Automatically adds 'createdAt' / Otomatik olarak oluşturulma tarihi ekler
+    required: [true, 'Kategori zorunludur'],
+  },
+}, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

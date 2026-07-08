@@ -22,11 +22,19 @@ exports.getAllCategories = async (req, res) => {
 exports.updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, description } = req.body;
+    const updatePayload = {};
+
+    if (name !== undefined) updatePayload.name = name;
+    if (description !== undefined) updatePayload.description = description;
+
+    if (!Object.keys(updatePayload).length) {
+      return res.status(400).json({ message: 'Guncellenecek alan gondermelisiniz' });
+    }
 
     const updatedCategory = await Category.findByIdAndUpdate(
       id,
-      { name },
+      updatePayload,
       { new: true, runValidators: true }
     );
 

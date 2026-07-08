@@ -1,5 +1,3 @@
-const fs = require('node:fs');
-const path = require('node:path');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { accessToken, refreshToken } = require('../config/jwtConfig');
@@ -26,7 +24,7 @@ const generateTokens = (user) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
 
@@ -40,14 +38,19 @@ const registerUser = async (req, res) => {
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    const userRole = role === 'admin' && adminCount === 0 ? 'admin' : 'user';
+
     const createdUser = await User.create({
       email,
       password: hashedPassword,
+      role: userRole,
     });
 
     const userWithoutPassword = {
       id: createdUser._id.toString(),
       email: createdUser.email,
+      role: createdUser.role,
       createdAt: createdUser.createdAt,
       updatedAt: createdUser.updatedAt,
     };
@@ -81,6 +84,7 @@ const loginUser = async (req, res) => {
     const userWithoutPassword = {
       id: existingUser._id.toString(),
       email: existingUser.email,
+      role: existingUser.role,
       createdAt: existingUser.createdAt,
       updatedAt: existingUser.updatedAt,
     };
@@ -89,7 +93,6 @@ const loginUser = async (req, res) => {
 
     await RefreshToken.deleteMany({ userId: existingUser._id });
 
-    // DÜZELTİLDİ: user._id yerine existingUser._id kullanıldı
     await RefreshToken.create({
       userId: existingUser._id, 
       token: tokens.refreshToken,
@@ -110,7 +113,7 @@ const refreshTokens = async (req, res) => {
     if (!oldRefreshToken) {
       return res
         .status(400)
-        .json({ message: 'Refresh token değerli zorunludur!' });
+        .json({ message: 'Refresh token değeri zorunludur!' });
     }
 
     await RefreshToken.deleteMany({ token: oldRefreshToken });
@@ -129,11 +132,8 @@ const refreshTokens = async (req, res) => {
         .json({ message: 'Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.' });
     }
 
-    // Generate new tokens
-    const tokens = generateTokens(user); // DÜZELTİLDİ: req.user yerine user kullanmak daha güvenli
+    const tokens = generateTokens(user);
 
-    // Save new refresh token
-    // DÜZELTİLDİ: existingUser._id yerine user._id kullanıldı
     await RefreshToken.create({
       userId: user._id,
       token: tokens.refreshToken,
@@ -145,8 +145,27 @@ const refreshTokens = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res) => {
+  try {
+    const { refreshToken: token } = req.body;
+
+    if (!token) {
+      return res
+        .status(400)
+        .json({ message: 'Refresh token değeri zorunludur!' });
+    }
+
+    await RefreshToken.deleteOne({ token });
+
+    return res.status(200).json({ message: 'Çıkış başarılı!' });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   refreshTokens,
+  logoutUser,
 };

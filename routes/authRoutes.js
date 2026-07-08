@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const { verifyRefreshToken } = require('../middleware/auth');
+const {
+  registerValidator,
+  loginValidator,
+  refreshTokenValidator,
+} = require('../validators/authValidators');
+const validate = require('../validators/validate');
 
 /**
  * @swagger
@@ -18,6 +25,11 @@ const authController = require('../controllers/authController');
  *         password:
  *           type: string
  *           minLength: 6
+ *         role:
+ *           type: string
+ *           enum:
+ *             - user
+ *             - admin
  *     AuthLoginInput:
  *       type: object
  *       required:
@@ -44,6 +56,11 @@ const authController = require('../controllers/authController');
  *         email:
  *           type: string
  *           format: email
+ *         role:
+ *           type: string
+ *           enum:
+ *             - user
+ *             - admin
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -78,7 +95,7 @@ const authController = require('../controllers/authController');
  *       400:
  *         description: Gecersiz veri veya email zaten kayitli
  */
-router.post('/register', authController.registerUser);
+router.post('/register', registerValidator, validate, authController.registerUser);
 
 /**
  * @swagger
@@ -104,7 +121,7 @@ router.post('/register', authController.registerUser);
  *       400:
  *         description: Gecersiz veri
  */
-router.post('/login', authController.loginUser);
+router.post('/login', loginValidator, validate, authController.loginUser);
 
 /**
  * @swagger
@@ -129,6 +146,33 @@ router.post('/login', authController.loginUser);
  *       404:
  *         description: Kullanici bulunamadi
  */
-router.post('/refresh-token', authController.refreshTokens);
+router.post(
+  '/refresh-token',
+  refreshTokenValidator,
+  validate,
+  verifyRefreshToken,
+  authController.refreshTokens,
+);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Refresh tokeni iptal ederek cikis yapar
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AuthRefreshTokenInput'
+ *     responses:
+ *       200:
+ *         description: Cikis basarili
+ *       400:
+ *         description: Refresh token eksik veya gecersiz istek
+ */
+router.post('/logout', refreshTokenValidator, validate, authController.logoutUser);
 
 module.exports = router;

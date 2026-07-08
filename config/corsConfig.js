@@ -1,9 +1,9 @@
 const allowedOrigins = [
+  process.env.CLIENT_URL,
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://www.google.com',
-];
+].filter(Boolean);
 
 const isAllowedPaymentOrigin = (origin) => {
   return /^https:\/\/([a-z0-9-]+\.)?(iyzipay\.com|stripe\.com)$/i.test(origin);

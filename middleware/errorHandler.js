@@ -1,6 +1,7 @@
 const { logEvents } = require('./logEvents');
 
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, next) => {
+  void next;
   const errorMessage = `${err.name}: ${err.message}\t${req.method}\t${req.headers.origin}`;
 
   logEvents(errorMessage, 'errLog.log');

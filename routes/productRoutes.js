@@ -28,18 +28,16 @@ const { authorizeRoles } = require("../middleware/roles");
  *           type: string
  *         description:
  *           type: string
- *         inStock:
- *           type: boolean
- *         tags:
- *           type: array
- *           items:
- *             type: string
+ *         image:
+ *           type: string
+ *           format: uri
  *     ProductInput:
  *       type: object
  *       required:
  *         - name
  *         - price
  *         - category
+ *         - description
  *       properties:
  *         name:
  *           type: string
@@ -51,13 +49,10 @@ const { authorizeRoles } = require("../middleware/roles");
  *           type: string
  *         description:
  *           type: string
- *           maxLength: 100
- *         inStock:
- *           type: boolean
- *         tags:
- *           type: array
- *           items:
- *             type: string
+ *           maxLength: 500
+ *         image:
+ *           type: string
+ *           format: uri
  *     ProductUpdateInput:
  *       type: object
  *       properties:
@@ -71,13 +66,10 @@ const { authorizeRoles } = require("../middleware/roles");
  *           type: string
  *         description:
  *           type: string
- *           maxLength: 100
- *         inStock:
- *           type: boolean
- *         tags:
- *           type: array
- *           items:
- *             type: string
+ *           maxLength: 500
+ *         image:
+ *           type: string
+ *           format: uri
  */
 
 /**

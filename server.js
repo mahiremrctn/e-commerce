@@ -4,6 +4,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const corsOptions = require('./config/corsConfig');
 const { logger } = require('./middleware/logEvents.js');
 const { errorHandler } = require('./middleware/errorHandler');
 const userRoutes = require('./routes/userRoutes.js');
@@ -11,6 +12,7 @@ const authRoutes = require('./routes/authRoutes.js');
 const productRoutes = require('./routes/productRoutes.js');
 const categoryRoutes = require('./routes/categoryRoutes.js');
 const iyzicoPaymentRoutes = require('./routes/iyzicoPaymentRoutes.js');
+const cartRoutes = require('./routes/cartRoutes.js');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger.js');
 const connectDB = require('./config/dbConfig');
@@ -36,7 +38,7 @@ const limiter = rateLimit({
   message: { success: false, message: 'Çok fazla istek gönderildi, lütfen bekleyin.' }
 });
 
-app.use(cors());
+app.use(cors(corsOptions));
 //Swagger docs 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 //Request log middleware
@@ -53,6 +55,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', limiter);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
 app.use('/api/iyzico-payments', iyzicoPaymentRoutes);
 
 io.on('connection', (socket) => {

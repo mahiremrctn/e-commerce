@@ -3,8 +3,8 @@ const User = require('../models/User');
 
 const sanitizeUser = (userDoc) => {
   const user = userDoc.toObject ? userDoc.toObject() : userDoc;
-  const { password, ...safeUser } = user;
-  return safeUser;
+  delete user.password;
+  return user;
 };
 
 const getAllUsers = async (req, res) => {

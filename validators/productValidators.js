@@ -36,24 +36,21 @@ const createProductValidator = [
     .custom(validateCategoryExists),
 
   body('description')
-    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('Aciklama zorunludur')
+    .bail()
     .isString()
     .withMessage('Aciklama metin olmalidir')
     .bail()
-    .isLength({ max: 100 })
-    .withMessage('Aciklama en fazla 100 karakter olabilir'),
+    .isLength({ max: 500 })
+    .withMessage('Aciklama en fazla 500 karakter olabilir'),
 
-  body('inStock')
+  body('image')
     .optional()
-    .isBoolean()
-    .withMessage('inStock alani boolean olmalidir'),
-
-  body('tags').optional().isArray().withMessage('tags alani dizi olmalidir'),
-
-  body('tags.*')
-    .optional()
-    .isString()
-    .withMessage('tags icindeki tum degerler metin olmalidir'),
+    .trim()
+    .isURL()
+    .withMessage('Gorsel alani gecerli bir URL olmalidir'),
 ];
 
 const productIdParamValidator = [
@@ -92,7 +89,7 @@ const updateProductValidator = [
 
   body()
     .custom((_, { req }) => {
-      const allowedFields = ['name', 'price', 'category', 'description', 'inStock', 'tags'];
+      const allowedFields = ['name', 'price', 'category', 'description', 'image'];
       const payloadKeys = Object.keys(req.body || {});
 
       if (!payloadKeys.length) {
@@ -130,26 +127,21 @@ const updateProductValidator = [
 
   body('description')
     .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('Aciklama bos olamaz')
+    .bail()
     .isString()
     .withMessage('Aciklama metin olmalidir')
     .bail()
-    .isLength({ max: 100 })
-    .withMessage('Aciklama en fazla 100 karakter olabilir'),
+    .isLength({ max: 500 })
+    .withMessage('Aciklama en fazla 500 karakter olabilir'),
 
-  body('inStock')
+  body('image')
     .optional()
-    .isBoolean()
-    .withMessage('inStock alani boolean olmalidir'),
-
-  body('tags')
-    .optional()
-    .isArray()
-    .withMessage('tags alani dizi olmalidir'),
-
-  body('tags.*')
-    .optional()
-    .isString()
-    .withMessage('tags icindeki tum degerler metin olmalidir'),
+    .trim()
+    .isURL()
+    .withMessage('Gorsel alani gecerli bir URL olmalidir'),
 ];
 
 module.exports = {

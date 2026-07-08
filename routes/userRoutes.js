@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const { verifyAccessToken } = require('../middleware/auth');
+const { authorizeRoles } = require('../middleware/roles');
+
+router.use(verifyAccessToken, authorizeRoles('admin'));
 
 /**
  * @swagger
